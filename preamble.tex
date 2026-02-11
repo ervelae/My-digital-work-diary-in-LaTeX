@@ -1,0 +1,120 @@
+% ---- File: preamble.tex ----
+% Shared packages and global configurations for all templates.
+% This file is \input by main.tex, Weekly_template.tex, Monthly_template.tex, and Annual_template.tex
+
+% ---- Packages ----
+\usepackage{hyperref}
+\usepackage{pgffor}
+\usepackage{pgfmath}
+\usepackage{pgfcalendar}
+\usepackage{tikz}
+\usepackage{tabularx}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{etoolbox}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{libertine}  % or lmodern, libertine, garamond, etc.
+\usepackage[paperwidth=288mm,paperheight=162mm,margin=2mm]{geometry}
+
+% Geometry (can be overridden in main.tex if needed)
+\providecommand{\PaperWidth}{288mm}
+\providecommand{\PaperHeight}{162mm}
+\providecommand{\PaperMargin}{2mm}
+
+% TikZ libraries
+\usetikzlibrary{calendar,shapes.multipart}
+
+% ---- Hyperref setup ----
+\hypersetup{colorlinks=true,linkcolor=blue!45!black}
+
+% ---- Layout & formatting ----
+\setlength{\parindent}{0pt}
+
+% ---- Global Configurations ----
+% Year for which you want automatic mapping:
+\providecommand{\DiaryYear}{2029} % <-- set the year here
+
+% Mode: "iso" (default) or "jan1"
+% - "iso": ISO week numbering (week 1 is the ISO week)
+%     mapping rule: week assigned to the month containing the week's Monday.
+% - "jan1": week 1 is the week that contains Jan 1, weeks start on Monday; mapping by Monday's month.
+\providecommand{\WeekMode}{iso}
+
+% ---- Helper Commands ----
+
+% Month names
+\providecommand{\MonthName}[1]{% 1..12
+  \ifcase#1\relax\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
+
+% Week date calculation helpers
+\newcount\julianfirstweek
+\newcount\wdayfirstweek
+\newcount\mondayfirstweek
+\newcount\julianmonday
+\newcount\juliansunday
+
+% Calculate week start date (Monday) given ISO week number
+% Sets \WeekStartDay, \WeekStartMonth, \WeekStartYear
+\providecommand{\CalcWeekStartDate}[2]{%
+  \pgfcalendardatetojulian{#1-01-04}{\julianfirstweek}%
+  \pgfcalendarjuliantoweekday{\julianfirstweek}{\wdayfirstweek}%
+  \mondayfirstweek=\julianfirstweek
+  \advance\mondayfirstweek by -\wdayfirstweek%
+  \pgfmathtruncatemacro{\weekoffset}{(#2-1)*7}%
+  \julianmonday=\mondayfirstweek
+  \advance\julianmonday by \weekoffset\relax%
+  \pgfcalendarjuliantodate{\julianmonday}{\tmpyear}{\tmpmonth}{\tmpday}%
+  \xdef\WeekStartDay{\tmpday}%
+  \xdef\WeekStartMonth{\tmpmonth}%
+  \xdef\WeekStartYear{\tmpyear}%
+}
+
+% Calculate week end date (Sunday) given ISO week number
+% Sets \WeekEndDay, \WeekEndMonth, \WeekEndYear
+\providecommand{\CalcWeekEndDate}[2]{%
+  \pgfcalendardatetojulian{#1-01-04}{\julianfirstweek}%
+  \pgfcalendarjuliantoweekday{\julianfirstweek}{\wdayfirstweek}%
+  \mondayfirstweek=\julianfirstweek
+  \advance\mondayfirstweek by -\wdayfirstweek%
+  \pgfmathtruncatemacro{\weekoffset}{(#2-1)*7 + 6}%
+  \juliansunday=\mondayfirstweek
+  \advance\juliansunday by \weekoffset\relax%
+  \pgfcalendarjuliantodate{\juliansunday}{\tmpyear}{\tmpmonth}{\tmpday}%
+  \xdef\WeekEndDay{\tmpday}%
+  \xdef\WeekEndMonth{\tmpmonth}%
+  \xdef\WeekEndYear{\tmpyear}%
+}
+
+% Format week date range
+% Sets \WeekDateRange
+\providecommand{\FormatWeekDates}[2]{%
+  \CalcWeekStartDate{#1}{#2}%
+  \CalcWeekEndDate{#1}{#2}%
+  \xdef\WeekDateRange{\WeekStartDay.\WeekStartMonth. - \WeekEndDay.\WeekEndMonth.}%
+}
+
+
+% Build week-to-month mapping
+\foreach \w in {1,...,53}{%
+  \CalcWeekStartDate{\DiaryYear}{\w}%
+  \xdef\WeekMonthNum{\the\numexpr\WeekStartMonth\relax}%
+  \ifcsdef{WeeksForMonth\WeekMonthNum}%
+    {\csxdef{WeeksForMonth\WeekMonthNum}{\csuse{WeeksForMonth\WeekMonthNum},\w}}%
+    {\csxdef{WeeksForMonth\WeekMonthNum}{\w}}%
+}
+
+
+% Build week-to-date mapping for quick lookup
+\foreach \w in {1,...,53}{%
+  \CalcWeekStartDate{\DiaryYear}{\w}%
+  \csxdef{WeekStartDay\w}{\WeekStartDay}%
+  \csxdef{WeekStartMonth\w}{\WeekStartMonth}%
+}
+
+
+\newcommand{\ClickBox}[2]{% #1=label target, #2=visible text
+  \hyperref[#1]{\kern2pt\raisebox{0pt}[13pt][9pt]{\mbox{#2}}\kern2pt}%
+}

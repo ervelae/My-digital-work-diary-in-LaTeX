@@ -1,0 +1,150 @@
+% ---- File: Monthly_template.tex ----
+% A single-instance monthly page with links to weeks. Compiles standalone.
+\ifdefined\INCLUDEMODE\else
+  \documentclass[11pt]{article}
+  \input{preamble.tex}
+  \begin{document}
+  \newcommand{\dayentries}{}
+\fi
+
+\pagecolor{red!5!white}
+
+% Defaults (can be overridden before \input by main.tex)
+\makeatletter
+\@ifundefined{c@rowcount}
+  {\newcounter{rowcount}}
+  {}
+\makeatother
+\setcounter{rowcount}{0}
+
+\newcount\julianday
+\providecommand{\MonthNumber}{1}
+\providecommand{\MonthTitle}{}
+\providecommand{\DiaryYear}{2026}
+\providecommand{\WeekList}{1,2,3,4}
+
+\providecommand{\ThisWeekNumber}{}
+
+\newcount\julianday
+\newcount\WeekStartMonth
+\newcount\WeekStartDay
+\providecommand{\CalcWeekStartDate}[2]{%
+  \WeekStartMonth=0\relax
+  \WeekStartDay=0\relax
+}
+
+\phantomsection
+\label{month-\MonthNumber}
+
+% If MonthTitle not provided, use MonthName
+\ifx\MonthTitle\empty
+  \edef\MonthTitleText{\MonthName{\MonthNumber}}
+\else
+  \edef\MonthTitleText{\MonthTitle}
+\fi
+
+% If month number is 1,2,3, then QuarterNumber is 1; if 4,5,6 then 2; if 7,8,9 then 3; if 10,11,12 then 4
+\newcommand{\QuarterNumber}{%
+  \ifnum\MonthNumber<4 1\else
+    \ifnum\MonthNumber<7 2\else
+      \ifnum\MonthNumber<10 3\else 4\fi
+    \fi
+  \fi
+}
+
+
+% helper for faint weekday tag
+\newcommand{\WeekdayTag}[1]{{\noexpand\footnotesize\noexpand\color{black!35} #1}\!\!\!}
+
+% Generate all days of the month first
+\renewcommand{\dayentries}{}
+\newcount\FoundWeekNum
+\newcount\DayTmp
+\foreach \day in {1,...,31}{%
+  \DayTmp=\day\relax
+  \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{day of month=\day}{%
+    \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{weekend}{%
+      % weekend
+      \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Saturday}{%
+        \xappto\dayentries{}%
+      }{}%
+      \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Sunday}{%
+      }{}%
+    }{%
+      % Monday
+      \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Monday}{%
+        \FoundWeekNum=0\relax
+        \foreach \w in {1,...,53}{%
+          \CalcWeekStartDate{\DiaryYear}{\w}%
+          \ifnum\WeekStartMonth=\MonthNumber\relax
+            \ifnum\WeekStartDay=\day\relax
+              \global\FoundWeekNum=\w\relax
+            \fi
+          \fi
+        }%
+        \def\DayLabel{\WeekdayTag{MON}}%
+        \ifnum\FoundWeekNum=0\relax
+          \xappto\dayentries{ & \noexpand\\[-18pt] \noalign{\noexpand\color{black}\noexpand\hrule height 0.5pt} \\[-18.5pt] }%
+          \xappto\dayentries{ {\noexpand\large Week n}\ \ \DayLabel & \the\DayTmp\\}%
+        \else
+          \xappto\dayentries{ & \noexpand\\[-18pt] \noalign{\noexpand\color{black}\noexpand\hrule height 0.5pt} \\[-18.5pt] }%
+          \xappto\dayentries{ {\noexpand\large\noexpand\hyperref[week-\the\FoundWeekNum]{Week~\the\FoundWeekNum}}\ \ \DayLabel & }%
+          \xappto\dayentries{ \the\DayTmp \\ }%
+        \fi
+      }{%
+        % Tue–Fri
+        \def\DayLabel{}%
+        \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Tuesday}{\def\DayLabel{\WeekdayTag{TUE}}}{}%
+        \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Wednesday}{\def\DayLabel{\WeekdayTag{WED}}}{}%
+        \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Thursday}{\def\DayLabel{\WeekdayTag{THU}}}{}%
+        \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{Friday}{\def\DayLabel{\WeekdayTag{FRI}}}{}%
+        \xappto\dayentries{ & \noexpand\\[-18pt] \noalign{\noexpand\color{black!8}\noexpand\hrule height 0.5pt} \\[-18.5pt] }%
+        \xappto\dayentries{ \ \DayLabel & \the\DayTmp\\}%
+      }%
+    }%
+  }{}%
+}%
+
+
+
+\Large \quad \textbf{\MonthTitleText} \quad \quad $-$ \quad \ \ClickBox{q\QuarterNumber-overview}{\phantom{~}\phantom{~}\phantom{~}Q\QuarterNumber\phantom{~}\phantom{~}\phantom{~}} \ \quad $-$ \quad \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}} \\[-20pt]
+
+\begin{tabular}{p{0.6\textwidth} m{0.35\textwidth}}
+\begin{minipage}[t]{0.6\textwidth}
+\Large
+% Count weekday entries
+\newcount\NumEntries
+\NumEntries=0\relax
+\foreach \day in {1,...,31}{%
+  \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{day of month=\day}{%
+    \pgfcalendarifdate{\DiaryYear-\MonthNumber-\day}{weekend}{}{%
+      \global\advance\NumEntries by 1\relax
+    }%
+  }{}%
+}%
+% Adjust array stretch based on number of entries
+\pgfmathsetmacro{\dynstretch}{max(1.0, 0.51+11/\the\NumEntries)}%
+\renewcommand{\arraystretch}{\dynstretch}%
+\begin{tabularx}{\textwidth}{@{}>{\raggedleft\arraybackslash}p{0.14\textwidth} X@{}}
+    \dayentries
+\end{tabularx}
+\renewcommand{\arraystretch}{1.0}% Reset
+\normalsize
+\end{minipage}%
+
+&
+\fbox{%
+\begin{minipage}[t]{0.35\textwidth}
+    \large\textbf{Notes for \MonthTitleText}\\ 
+    \vspace{33em} % Space for notes
+\end{minipage}
+}%%
+
+\end{tabular}
+
+\clearpage
+
+
+\ifdefined\INCLUDEMODE\else
+  \end{document}
+\fi

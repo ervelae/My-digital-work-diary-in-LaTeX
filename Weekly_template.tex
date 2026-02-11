@@ -1,0 +1,229 @@
+% ---- File: Weekly_template.tex ----
+% A single-instance weekly two-page spread (schedule/todo + notes). Compiles standalone.
+\ifdefined\INCLUDEMODE\else
+  \documentclass[11pt]{article}
+  \input{preamble.tex}
+  \begin{document}
+\fi
+
+
+\pagecolor[rgb]{0.95, 0.94, 0.99} 
+
+% Defaults
+\providecommand{\WeekNumber}{1}
+
+% navigation helpers (safe numeric prev/next for a 52-week cycle)
+\newcommand{\PrevWeekNum}[1]{% returns previous week number (1..52)
+  \pgfmathtruncatemacro{\p}{mod (#1-2,52)+1}\p
+}
+\newcommand{\NextWeekNum}[1]{% returns next week number (1..52)
+  \pgfmathtruncatemacro{\n}{mod (#1,52)+1}\n
+}
+
+% Provide defaults for standalone compilation
+\providecommand{\WeekDateRange}{1.1. - 7.1.}
+\providecommand{\WeekMonthName}{January}
+\providecommand{\WeekMonthLink}{monthoverview}
+\providecommand{\WeekMonthNum}{1}
+\providecommand{\DiaryYear}{2026}
+\providecommand{\WeekStartYear}{2026}
+\providecommand{\WeekStartMonth}{1}
+\providecommand{\WeekStartDay}{1}
+\providecommand{\DayLabelMon}{1.1.}
+\providecommand{\DayLabelTue}{2.1.}
+\providecommand{\DayLabelWed}{3.1.}
+\providecommand{\DayLabelThu}{4.1.}
+\providecommand{\DayLabelFri}{5.1.}
+
+% If month number is 1,2,3, then QuarterNumber is 1; if 4,5,6 then 2; if 7,8,9 then 3; if 10,11,12 then 4
+\newcommand{\QuarterNumber}{%
+  \ifnum\WeekMonthNum<4 1\else
+    \ifnum\WeekMonthNum<7 2\else
+      \ifnum\WeekMonthNum<10 3\else 4\fi
+    \fi
+  \fi
+}
+
+
+
+% A timetable of the week from Monday to Friday, with time slots from 7:00 to 20:00
+\hspace*{4pt}\noindent{\Large
+  \textbf{\ Week \WeekNumber} \ \ $-$ \ \ 
+  \ClickBox{month-\WeekMonthNum}{\phantom{~}\WeekMonthName\phantom{~}} \ \ $-$ \ \ 
+  \ClickBox{q\QuarterNumber-overview}{\phantom{~}\phantom{~}\phantom{~}Q\QuarterNumber\phantom{~}\phantom{~}\phantom{~}} \ \ $-$ \ \
+  \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}
+}\\[3pt]
+\phantom{~} \ \textbf{Timetable} 
+\\[-25pt]
+
+\newcommand{\timetableCellHeight}{0.1cm}
+\newcommand{\timetableCellWidth}{0.183\textwidth}
+
+% Macro for a single timetable row: #1=hour, #2=minute, #3=weight(normal|bold)
+\newcommand{\ttrow}[3]{%
+  {\color{black}
+  \ifx\relax#3\relax
+    #1:#2
+  \else
+    \textbf{#1:#2}%
+  \fi}
+  &
+  \raisebox{2pt}{\rule{\timetableCellWidth}{\ifx\relax#3\relax 0.2pt\else 1.5pt\fi}} &
+  \raisebox{2pt}{\rule{\timetableCellWidth}{\ifx\relax#3\relax 0.2pt\else 1.5pt\fi}} &
+  \raisebox{2pt}{\rule{\timetableCellWidth}{\ifx\relax#3\relax 0.2pt\else 1.5pt\fi}} &
+  \raisebox{2pt}{\rule{\timetableCellWidth}{\ifx\relax#3\relax 0.2pt\else 1.5pt\fi}} &
+  \raisebox{2pt}{\rule{\timetableCellWidth}{\ifx\relax#3\relax 0.2pt\else 1.5pt\fi}} &
+  {\color{black}
+    \ifx\relax#3\relax
+    #1:#2
+  \else
+    \textbf{#1:#2}%
+  \fi}
+  \\[\timetableCellHeight]%
+}
+
+\begin{minipage}[t][0.8\textheight]{\dimexpr\textwidth-12pt\relax}
+  \small
+  \renewcommand{\arraystretch}{1.0}
+  \setlength{\tabcolsep}{2pt}
+  \color{black!30}
+  \begin{tabular}{r >{\centering\arraybackslash}m{\timetableCellWidth}|>{\centering\arraybackslash}m{\timetableCellWidth}|>{\centering\arraybackslash}m{\timetableCellWidth}|>{\centering\arraybackslash}m{\timetableCellWidth}|>{\centering\arraybackslash}m{\timetableCellWidth} l }
+    \rowcolor{cyan!20}
+    \ & {\color{black}\textbf{Monday}} & {\color{black}\textbf{Tuesday}} & {\color{black}\textbf{Wednesday}} & {\color{black}\textbf{Thursday}} & {\color{black}\textbf{Friday}} & \ \\
+    \ttrow{6}{30}{}
+    \ttrow{7}{00}{b}
+    \ttrow{7}{30}{}
+    \ttrow{8}{00}{b}
+    \ttrow{8}{30}{}
+    \ttrow{9}{00}{b}
+    \ttrow{9}{30}{}
+    \ttrow{10}{00}{b}
+    \ttrow{10}{30}{}
+    \ttrow{11}{00}{b}
+    \ttrow{11}{30}{}
+    \ttrow{12}{00}{b}
+    \ttrow{12}{30}{}
+    \ttrow{13}{00}{b}
+    \ttrow{13}{30}{}
+    \ttrow{14}{00}{b}
+    \ttrow{14}{30}{}
+    \ttrow{15}{00}{b}
+    \ttrow{15}{30}{}
+    \ttrow{16}{00}{b}
+    \ttrow{16}{30}{}
+    \ttrow{17}{00}{b}
+    \ttrow{17}{30}{}
+    \ttrow{18}{00}{b}
+    \ttrow{18}{30}{}
+    \ttrow{19}{00}{b}
+    \ttrow{19}{30}{}
+    %\ttrow{20}{00}{b}
+  \end{tabular}
+\end{minipage}
+
+\clearpage
+
+
+
+
+
+% Build day labels from the week start date (Monday)
+\newcount\weekstartjulian
+\newcount\weekdayscratch
+\newcommand{\BuildWeekDayDates}{%
+  \pgfcalendardatetojulian{\WeekStartYear-\WeekStartMonth-\WeekStartDay}{\weekstartjulian}%
+  \foreach \d/\n in {0/Mon,1/Tue,2/Wed,3/Thu,4/Fri}{%
+    \weekdayscratch=\weekstartjulian
+    \advance\weekdayscratch by \d\relax
+    \pgfcalendarjuliantodate{\weekdayscratch}{\tmpyear}{\tmpmonth}{\tmpday}%
+    \expandafter\xdef\csname DayLabel\n\endcsname{\tmpday.\tmpmonth.}%
+  }%
+}
+\BuildWeekDayDates
+
+% Page 2: to-do lists and notes
+\phantomsection
+\hypertarget{week-\WeekNumber}{}\label{week-\WeekNumber}
+
+%\quad \\[-10pt] 
+%\newcommand{\ClickBox}[2]{% #1=label target, #2=visible text
+%  \hyperref[#1]{\kern2pt\raisebox{0pt}[13pt][9pt]{\mbox{#2}}\kern2pt}%
+%}
+
+
+
+\hspace*{4pt}\noindent{\Large
+  \textbf{\ Week \WeekNumber} \ \ $-$ \ \ %\WeekDateRange{}\ \ $-$ \ \
+  \ClickBox{month-\WeekMonthNum}{\phantom{~}\WeekMonthName\phantom{~}} \ \ $-$ \ \ 
+  \ClickBox{q\QuarterNumber-overview}{\phantom{~}\phantom{~}\phantom{~}Q\QuarterNumber\phantom{~}\phantom{~}\phantom{~}} \ \ $-$ \ \
+  \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}
+}\\[-30pt]%\noindent{\small \hyperlink{week-\p}{Prev} \quad | \quad \hyperlink{week-\n}{Next} \quad | \quad \hyperlink{monthoverview}{Months}}\vspace{2pt}
+
+\hspace{10pt}
+% Layout: two columns
+\begin{tabularx}{\textwidth}{@{}>{\raggedright}p{0.415\textwidth} X@{}}
+  \begin{minipage}[t]{0.39\textwidth} % width of schedule boxes
+    \quad\\ 
+    \renewcommand{\arraystretch}{1.5} % Space between rows
+    \newcommand{\TimeSlotHeight}{2.71cm} % height of each time slot box:
+    \begin{tabular}{@{}p{0.18\textwidth} p{0.28\textwidth}@{}}
+      \fbox{\begin{minipage}[t][\TimeSlotHeight]{1.0\textwidth}\textbf{Mon} \DayLabelMon\\\end{minipage}}\\
+      \fbox{\begin{minipage}[t][\TimeSlotHeight]{1.0\textwidth}\textbf{Tue} \DayLabelTue\\\end{minipage}}\\
+      \fbox{\begin{minipage}[t][\TimeSlotHeight]{1.0\textwidth}\textbf{Wed} \DayLabelWed\\\end{minipage}}\\
+      \fbox{\begin{minipage}[t][\TimeSlotHeight]{1.0\textwidth}\textbf{Thu} \DayLabelThu\\\end{minipage}}\\
+      \fbox{\begin{minipage}[t][\TimeSlotHeight]{1.0\textwidth}\textbf{Fri} \DayLabelFri\\\end{minipage}}\\
+    \end{tabular}
+  \end{minipage}
+  &
+  \begin{minipage}[t]{0.538\textwidth}
+    \quad\\[-17pt]
+    \textbf{Main To-do}\\[-6pt]
+    \fbox{%
+      \begin{minipage}[t]{\textwidth}
+        \quad \\[3pt]
+        \setlength{\parskip}{6pt}
+        \foreach \i in {1,...,6}{%
+          \raisebox{0.6ex}{\LARGE $\square$} \rule{0.95\textwidth}{0.4pt}\\[7.5pt]
+        }
+        \raisebox{0.6ex}{\LARGE $\square$}\rule{0.95\textwidth}{0.4pt}
+      \end{minipage}
+    }\\[7pt]
+    \textbf{Secondary To-do}\\[-6pt]
+    \fbox{%
+      \begin{minipage}[t]{\textwidth}
+        \quad \\[3pt]
+        \setlength{\parskip}{6pt}
+        \foreach \i in {1,...,11}{%
+          \raisebox{0.6ex}{\LARGE $\square$} \rule{0.95\textwidth}{0.4pt}\\[5.5pt]
+        }
+        \raisebox{0.6ex}{\LARGE $\square$} \rule{0.95\textwidth}{0.4pt}
+      \end{minipage}
+    }
+  \end{minipage}
+  
+\end{tabularx}
+
+% Page 2: notes
+\clearpage
+%\quad \\[-10pt]
+\hspace*{4pt}\noindent{\Large
+  \textbf{\ Week \WeekNumber} \ \ $-$ \ \ %\WeekDateRange{}\ \ $-$ \ \
+  \ClickBox{month-\WeekMonthNum}{\phantom{~}\WeekMonthName\phantom{~}} \ \ $-$ \ \ 
+  \ClickBox{q\QuarterNumber-overview}{\phantom{~}\phantom{~}\phantom{~}Q\QuarterNumber\phantom{~}\phantom{~}\phantom{~}} \ \ $-$ \ \
+  \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}
+}\\[5pt]%\noindent{\small \hyperlink{week-\p}{Prev} \quad | \quad \hyperlink{week-\n}{Next} \quad | \quad \hyperlink{monthoverview}{Months}}\vspace{2pt}
+\hspace*{6pt}
+  \begin{minipage}[t][0.91\textheight]{\dimexpr\textwidth-12pt\relax}
+    \textbf{Notes}\\[15pt]
+    \color{black!15}%
+    \foreach \i in {1,...,20}{%
+      \rule{0.99\textwidth}{0.4pt}\\[12pt]
+    }
+  \end{minipage}
+
+\clearpage
+
+
+\ifdefined\INCLUDEMODE\else
+  \end{document}
+\fi

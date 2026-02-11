@@ -1,0 +1,86 @@
+% ---- File: Annual_template.tex ----
+% A single-instance annual overview page (compiles standalone).
+% When included from main.tex, define \INCLUDEMODE to suppress preamble.
+\ifdefined\INCLUDEMODE\else
+  \documentclass[11pt]{article}
+  \input{preamble.tex}
+  \begin{document}
+\fi
+
+% default title if not provided
+\providecommand{\DiaryTitle}{My Digital Diary}
+
+\pagecolor{brown!25!white}
+\phantomsection
+\label{annual-overview}
+
+\newcommand{\monthboxwidth}{0.29\textwidth}
+\newcommand{\monthboxheight}{3.37cm}
+
+\LARGE
+\begin{center}
+  {Annual Overview \DiaryYear} \\[5pt]
+  \begin{tabular}[c]{c c c c}
+    \ClickBox{q1-overview}{Q1} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-1]{\MonthName{1}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-2]{\MonthName{2}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-3]{\MonthName{3}}}\\[6pt]\end{minipage}} \\
+    \\[-18pt]
+    \ClickBox{q2-overview}{Q2} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-4]{\MonthName{4}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-5]{\MonthName{5}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-6]{\MonthName{6}}}\\[6pt]\end{minipage}} \\
+    \\[-18pt]
+    \ClickBox{q3-overview}{Q3} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-7]{\MonthName{7}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-8]{\MonthName{8}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-9]{\MonthName{9}}}\\[6pt]\end{minipage}} \\
+   \\[-18pt]
+    \ClickBox{q4-overview}{Q4} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-10]{\MonthName{10}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-11]{\MonthName{11}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-12]{\MonthName{12}}}\\[6pt]\end{minipage}} \\
+  \end{tabular}
+\end{center}
+
+
+\clearpage
+
+\pagecolor{brown!30!white}
+
+
+% Annual Overview for the next year
+\phantomsection
+\label{annual-overview-next}
+
+\LARGE
+\begin{center}
+  {Next year's Annual Overview \the\numexpr\DiaryYear+1\relax \ } \\[3pt]
+  \begin{tabular}[c]{c c c c}
+    Q1 &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-1]{\MonthName{1}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-2]{\MonthName{2}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-3]{\MonthName{3}}}\\[6pt]\end{minipage}} \\
+    \\[-18pt]
+    Q2 &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-4]{\MonthName{4}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-5]{\MonthName{5}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-6]{\MonthName{6}}}\\[6pt]\end{minipage}} \\
+    \\[-18pt]
+    Q3 &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-7]{\MonthName{7}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-8]{\MonthName{8}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-9]{\MonthName{9}}}\\[6pt]\end{minipage}} \\
+    \\[-18pt]
+    Q4 &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-10]{\MonthName{10}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-11]{\MonthName{11}}}\\[6pt]\end{minipage}} &
+    \fbox{\begin{minipage}[t][\monthboxheight][t]{\monthboxwidth}\centering\Large\textbf{\hyperref[month-next-12]{\MonthName{12}}}\\[6pt]\end{minipage}} \\
+  \end{tabular}
+\end{center}
+
+
+
+\ifdefined\INCLUDEMODE\else
+  \end{document}
+\fi

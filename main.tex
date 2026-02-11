@@ -1,0 +1,73 @@
+% ---- File: main.tex ----
+% This file composes the full year by including the templates above multiple times.
+% Put all files in the same folder and run `pdflatex main.tex` (run twice for links).
+\documentclass[11pt]{article}
+
+% Load shared preamble
+\input{preamble.tex}
+
+% ---- Local Configuration ----
+% Year for which you want automatic mapping:
+%%\newcommand{\DiaryYear}{2026} % <-- set the year here
+
+% When including templates, set INCLUDEMODE so they skip their preambles
+\newcommand{\INCLUDEMODE}{}
+
+\begin{document}
+
+% First page color
+\providecommand{\DiaryBackgroundColor}{violet!25}
+\pagecolor{\DiaryBackgroundColor}
+
+% Define month-related commands
+\newcommand{\MonthNumber}{}
+\newcommand{\MonthTitle}{}
+\newcommand{\WeekList}{}
+\newcommand{\dayentries}{}
+
+% Define week-related commands before the loop
+\newcommand{\WeekNumber}{}
+\newcommand{\WeekMonthName}{}
+
+% Cover page
+\begin{center}
+  \ \\[30pt]
+  {\Huge \bfseries My Digital Work Diary}\\[18pt]
+  {\LARGE Planner for \DiaryYear} \\[40pt]
+  Author: \\
+  Elias Ervelä\\[10pt]
+\end{center}
+\clearpage
+
+
+% Annual page (one instance)
+\input{Annual_template.tex}
+\clearpage
+
+\input{Quarterly_template.tex}
+\clearpage
+
+% Month pages (12 instances)
+\foreach \m in {1,...,12}{%
+  \ifcsdef{WeeksForMonth\m}%
+    {\edef\WeekList{\csuse{WeeksForMonth\m}}}%
+    {\edef\WeekList{}}%
+  \renewcommand{\MonthNumber}{\the\numexpr\m\relax}%
+  \renewcommand{\MonthTitle}{\MonthName{\m}}%
+  \input{Monthly_template.tex}
+  \clearpage
+}
+
+\clearpage
+
+% Weekly pages (53 instances)
+\foreach \w in {1,...,53}{%
+  \FormatWeekDates{\DiaryYear}{\w}%
+  \CalcWeekStartDate{\DiaryYear}{\w}%
+  \xdef\WeekMonthNum{\the\numexpr\WeekStartMonth\relax}%
+  \xdef\WeekMonthName{\MonthName{\WeekStartMonth}}%
+  \renewcommand{\WeekNumber}{\w}%
+  \input{Weekly_template.tex}%
+}
+
+\end{document}

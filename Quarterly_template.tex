@@ -1,0 +1,217 @@
+% ---- File: Quarterly_template.tex ----
+% A single-instance annual overview page (compiles standalone).
+% When included from main.tex, define \INCLUDEMODE to suppress preamble.
+\ifdefined\INCLUDEMODE\else
+  \documentclass[11pt]{article}
+    \usepackage{tabularx}
+  \usepackage{calc}
+  \input{preamble.tex}
+  \begin{document}
+    \newcommand{\monthboxwidth}{0.31\textwidth}
+    \newcommand{\monthboxheight}{7.3cm}
+
+\fi
+
+
+\pagecolor{brown!15!white}
+
+% Defaults (can be overridden before \input by main.tex)
+\makeatletter
+\@ifundefined{c@rowcount}
+  {\newcounter{rowcount}}
+  {}
+\makeatother
+\setcounter{rowcount}{0}
+\newcount\FoundWeekNum
+
+\newcount\julianday
+\providecommand{\MonthNumber}{1}
+\providecommand{\MonthTitle}{January}
+\providecommand{\DiaryYear}{2026}
+\providecommand{\WeekList}{1,2,3,4}
+\providecommand{\MonthName}{January1}
+
+\providecommand{\ThisWeekNumber}{1}
+
+\newcount\julianday
+\newcount\WeekStartMonth
+\newcount\WeekStartDay
+\providecommand{\CalcWeekStartDate}[2]{%
+  \WeekStartMonth=0\relax
+  \WeekStartDay=0\relax
+}
+
+\newcommand{\calendarboxheight}{0.6cm}
+\newcommand{\calendarboxwidth}{0.87cm}
+\newcount\FoundWeekNum
+
+% A simple calendar for the month
+\newcommand*{\calendarmonth}[2]{%
+  \setcounter{rowcount}{1}%
+  \begin{tikzpicture}[x=1.12cm,y=1.34cm]
+    % display the month name at the top
+    \path (3,0.4) node {\large\textbf{\hyperref[month-#2]{\MonthName{#2}}}};
+    \begin{scope}
+      [every node/.style={rectangle,fill=green!5,minimum width=1.12cm}]
+      \foreach \x in {0,...,6}
+       {\path (\x,-0.2) node {\pgfcalendarweekdayshortname{\x}};}
+    \end{scope}
+    \pgfcalendar{cal}{#1-#2-01}{#1-#2-last}
+    {%
+      % Is this the first day of the month?
+      \ifnum\pgfcalendarcurrentday=1\relax
+      % Fill in days from previous month if this isn't a Monday
+      \ifdate{Monday}{}
+      {
+        % Get last day of previous month
+        \julianday = \pgfcalendarcurrentjulian\relax
+        \advance\julianday by -\pgfcalendarcurrentweekday\relax
+        \foreach \x in {0,...,\numexpr\pgfcalendarcurrentweekday-1}
+        {
+          \pgfcalendarjuliantodate
+            {\julianday}{\theyear}{\themonth}{\theday}
+          \path (\x,-1)
+           node
+           [
+             rectangle split,
+             rectangle split parts=2,
+             draw]
+          {\number\theday
+           \nodepart{two}
+           \parbox[t][\calendarboxheight]{\calendarboxwidth}{\mbox{}}%
+          };
+          \global\advance\julianday by 1\relax
+        }
+      }
+      \fi
+      \def\thebackground{magenta!4}%
+      \ifcsdef{\pgfcalendarsuggestedname}%
+      {%
+        \def\thecontents{\csuse{\pgfcalendarsuggestedname}}%
+        \def\thebackground{black!10}%
+      }%
+      {%
+        \def\thecontents{\mbox{}}%
+        \ifdate{weekend}{\def\thebackground{black!10}}{}%
+      }%
+      \path (\pgfcalendarcurrentweekday,-\therowcount)
+       node
+       [
+         rectangle split,
+         rectangle split parts=2,
+         rectangle split part fill={cyan!20,\thebackground},
+         draw] 
+      {\pgfcalendarcurrentday
+       \nodepart{two}%
+       \parbox[t][\calendarboxheight]{\calendarboxwidth}{\small\thecontents}%
+      };
+        \ifdate{Monday}{
+        {\FoundWeekNum=0\relax
+        \foreach \w in {1,...,53}{%
+            \ifnum\csuse{WeekStartMonth\w}=#2\relax
+            \ifnum\csuse{WeekStartDay\w}=\pgfcalendarcurrentday\relax
+                \global\FoundWeekNum=\w\relax
+            \fi
+            \fi
+        }%
+        \path (-1.1,-\therowcount) node  {\ClickBox{week-\the\FoundWeekNum}{Wk~\the\FoundWeekNum}};}      %%{\hyperref[week-\the\FoundWeekNum]{Wk~\the\FoundWeekNum}};}
+        }{}%
+      \ifdate{Sunday}{\stepcounter{rowcount}}{}%
+      \xdef\lastjulianday{\number\pgfcalendarcurrentjulian}
+      \xdef\lastweekday{\number\pgfcalendarcurrentweekday}
+    }%
+    \ifnum\lastweekday < 6\relax
+     \julianday = \lastjulianday\relax
+     \edef\lastweekday{\number\numexpr\lastweekday+1\relax}
+     \foreach \x in {\lastweekday,...,6}
+     {
+       \global\advance\julianday by 1\relax
+       \pgfcalendarjuliantodate{\julianday}{\theyear}{\themonth}{\theday}
+       \path (\x,-\therowcount)
+        node
+        [
+          rectangle split,
+          rectangle split parts=2,
+          draw]
+       {\number\theday
+        \nodepart{two}
+        \parbox[t][\calendarboxheight]{\calendarboxwidth}{\mbox{}}%
+       };
+     }
+    \fi
+  \end{tikzpicture}%
+  }
+\renewcommand{\monthboxwidth}{0.31\textwidth}
+\renewcommand{\monthboxheight}{5.3cm}
+
+\clearpage
+
+% Define length for storing calendar height
+\newlength{\measuredcalheight}
+\newlength{\totalcolumnheight}
+\newlength{\fboxheight}
+
+\setlength{\totalcolumnheight}{0.86\textheight} % Adjust as needed
+
+% Command to create a column with calendar + fbox
+\newcommand{\quartercolumn}[1]{%
+  \begin{minipage}[c]{\monthboxwidth}
+    % Measure the calendar height
+    \setbox0=\vbox{\calendarmonth{\DiaryYear}{#1}}%
+    \measuredcalheight=\ht0%
+    \advance\measuredcalheight by \dp0%
+    % Display the calendar
+    \usebox{0}\\[0pt]%
+    % Calculate remaining height
+    \fboxheight=\totalcolumnheight%
+    \advance\fboxheight by -\measuredcalheight%
+    \advance\fboxheight by -6pt% % Subtract spacing
+    % Create fbox with remaining height
+    \begin{minipage}[t][\fboxheight][t]{0.97\textwidth} \color{black!20}\foreach \i in {1,...,12}{\rule{1.1\textwidth}{0.4pt}\\[12pt]}\end{minipage}%
+  \end{minipage}%
+}
+{\small
+\phantomsection
+\label{q1-overview}
+{\Large \ Quarter 1  \ $-$  \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}}
+\\[-8pt]
+\noindent 
+\quartercolumn{1}\hfill
+\quartercolumn{2}\hfill
+\quartercolumn{3} \ \ \hfill
+
+\clearpage
+\phantomsection
+\label{q2-overview}
+{\Large \ Quarter 2 \ $-$  \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}}
+\\[-8pt]
+\noindent 
+\quartercolumn{4}\hfill
+\quartercolumn{5}\hfill
+\quartercolumn{6} \ \ \hfill
+
+\clearpage
+\phantomsection
+\label{q3-overview}
+{\Large \ Quarter 3 \ $-$ \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}}
+\\[-8pt]
+\noindent 
+\quartercolumn{7}\hfill
+\quartercolumn{8}\hfill
+\quartercolumn{9} \ \ \hfill
+
+\clearpage
+\phantomsection
+\label{q4-overview}
+{\Large \ Quarter 4 \ $-$  \ClickBox{annual-overview}{\phantom{~}\DiaryYear\phantom{~}}}
+\\[-8pt]
+\noindent 
+\quartercolumn{10}\hfill
+\quartercolumn{11}\hfill
+\quartercolumn{12} \ \ \hfill
+}
+\normalsize
+
+\ifdefined\INCLUDEMODE\else
+  \end{document}
+\fi

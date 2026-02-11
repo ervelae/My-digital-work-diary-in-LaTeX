@@ -1,0 +1,189 @@
+% ---- File: Monthly_template.tex ----
+% A single-instance monthly page with links to weeks. Compiles standalone.
+\ifdefined\INCLUDEMODE\else
+  \documentclass[11pt]{article}
+  \usepackage[paperwidth=288mm,paperheight=162mm,margin=2mm]{geometry}
+  \usepackage{hyperref}
+  \usepackage{pgffor}
+  \usepackage{parskip}
+  \usepackage{pgfcalendar}
+  \usepackage{xcolor}
+  \usepackage{tikz}
+  \usepackage{tabularx}
+  \usepackage{etoolbox}
+  \usepackage{colortbl}
+  \usetikzlibrary{calendar,shapes.multipart}
+  \setlength{\parindent}{0pt}
+  \hypersetup{colorlinks=true,linkcolor=blue}
+  
+  % ---- configuration ----
+  % Year for which you want automatic mapping:
+  \newcommand{\DiaryYear}{2026} % <-- set the year here
+  % Mode: "iso" (default) or "jan1"
+  % - "iso": ISO week numbering (week 1 is the ISO week)
+  %     mapping rule: week assigned to the month containing the week's Monday.
+  % - "jan1": week 1 is the week that contains Jan 1, weeks start on Monday; mapping by Monday's month.
+  \newcommand{\WeekMode}{iso} % or jan1
+  \newcommand{\dayentries}{}
+
+  \begin{document}
+
+  
+\fi
+
+\pagecolor{red!5!white}
+
+
+% Defaults (can be overridden before \input by main.tex)
+\makeatletter
+\@ifundefined{c@rowcount}
+  {\newcounter{rowcount}}
+  {}
+\makeatother
+\setcounter{rowcount}{0}
+
+\newcount\julianday
+\providecommand{\MonthNumber}{1}
+\providecommand{\MonthTitle}{}
+\providecommand{\DiaryYear}{2026}
+\providecommand{\MonthName}[1]{% 1..12
+  \ifcase#1\relax\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
+\providecommand{\WeekList}{1,2,3,4}
+
+\providecommand{\ThisWeekNumber}{} % avoid "Undefined control sequence"
+
+\newcount\julianday
+\newcount\WeekStartMonth
+\newcount\WeekStartDay
+\providecommand{\CalcWeekStartDate}[2]{%
+  % fallback: set numeric registers to 0 so \ifnum tests don't fail
+  \WeekStartMonth=0\relax
+  \WeekStartDay=0\relax
+}
+
+
+
+%\AtBeginDocument{%
+%  \phantomsection
+%  \label{month-\MonthNumber}%
+%}
+
+
+\phantomsection
+\label{month-\MonthNumber}
+
+% If MonthTitle not provided, use MonthName
+\ifx\MonthTitle\empty
+  \edef\MonthTitleText{\MonthName{\MonthNumber}}
+\else
+  \edef\MonthTitleText{\MonthTitle}
+\fi
+
+
+
+
+
+
+
+
+
+% A simple calendar for the month
+
+\newcommand*{\calendarmonth}[2]{%
+  \fbox{%
+  \setcounter{rowcount}{1}%
+  \begin{tikzpicture}[x=1.5cm,y=1.75cm]
+    % display the month name at the top
+    \path (3,1) node {\pgfcalendarmonthname{#2}};
+    \begin{scope}
+      [every node/.style={rectangle,fill=green!5,minimum width=1.4cm}]
+      \foreach \x in {0,...,6}
+       {\path (\x,0) node {\pgfcalendarweekdayshortname{\x}};}
+    \end{scope}
+    \pgfcalendar{cal}{#1-#2-01}{#1-#2-last}
+    {%
+      % Is this the first day of the month?
+      \ifnum\pgfcalendarcurrentday=1\relax
+      % Fill in days from previous month if this isn't a Monday
+      \ifdate{Monday}{}
+      {
+        % Get last day of previous month
+        \julianday = \pgfcalendarcurrentjulian\relax
+        \advance\julianday by -\pgfcalendarcurrentweekday\relax
+        \foreach \x in {0,...,\numexpr\pgfcalendarcurrentweekday-1}
+        {
+          \pgfcalendarjuliantodate
+            {\julianday}{\theyear}{\themonth}{\theday}
+          \path (\x,-1)
+           node
+           [
+             rectangle split,
+             rectangle split parts=2,
+             draw]
+          {\number\theday
+           \nodepart{two}
+           \parbox[t][1cm]{1.2cm}{\mbox{}}%
+          };
+          \global\advance\julianday by 1\relax
+        }
+      }
+      \fi
+      \def\thebackground{magenta!4}%
+      \ifcsdef{\pgfcalendarsuggestedname}%
+      {%
+        \def\thecontents{\csuse{\pgfcalendarsuggestedname}}%
+        \def\thebackground{black!4}%
+      }%
+      {%
+        \def\thecontents{\mbox{}}%
+        \ifdate{weekend}{\def\thebackground{black!4}}{}%
+      }%
+      \path (\pgfcalendarcurrentweekday,-\therowcount)
+       node
+       [
+         rectangle split,
+         rectangle split parts=2,
+         rectangle split part fill={cyan!20,\thebackground},
+         draw] 
+      {\pgfcalendarcurrentday
+       \nodepart{two}%
+       \parbox[t][1cm]{1.2cm}{\small\thecontents}%
+      };
+      \ifdate{Sunday}{\stepcounter{rowcount}}{}%
+      \xdef\lastjulianday{\number\pgfcalendarcurrentjulian}
+      \xdef\lastweekday{\number\pgfcalendarcurrentweekday}
+    }%
+    \ifnum\lastweekday < 6\relax
+     \julianday = \lastjulianday\relax
+     \edef\lastweekday{\number\numexpr\lastweekday+1\relax}
+     \foreach \x in {\lastweekday,...,6}
+     {
+       \global\advance\julianday by 1\relax
+       \pgfcalendarjuliantodate{\julianday}{\theyear}{\themonth}{\theday}
+       \path (\x,-\therowcount)
+        node
+        [
+          rectangle split,
+          rectangle split parts=2,
+          draw]
+       {\number\theday
+        \nodepart{two}
+        \parbox[t][1cm]{1.2cm}{\mbox{}}%
+       };
+     }
+    \fi
+  \end{tikzpicture}%
+  }
+}
+
+\calendarmonth{\DiaryYear}{\MonthNumber} 
+
+
+\clearpage
+
+
+
+
+\ifdefined\INCLUDEMODE\else
+  \end{document}
+\fi

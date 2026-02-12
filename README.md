@@ -6,13 +6,13 @@ I couldn't find any diaries online that would fit my needs so I made my one myse
 
 Feel free to use and modify! Do not use for commercial purposes.
 
-## Structure of .tex files
+## Structure of LaTeX files
 
 `preamble.tex` includes all the packages and global configurations. Here you can set the year or change how week 1 is defined.
 
-`main.tex` includes all the `template.tex` files in one pdf correct number of times. 
+`main.tex` compiles the big pdf. It takes all the `*_template.tex` files in and repeats them correct number of times with correct labels. 
 
-Each `_template.tex` compiles also standalone for easy modifications.
+Each `*_template.tex` compiles also standalone for easy modifications without needing to compile all.
 
 `.latexmkrc` puts all the log files and such in a `\build` folder
 
